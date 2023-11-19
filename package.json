@@ -2,7 +2,7 @@
   "name": "new-chill-bot",
   "version": "1.0.0",
   "description": "new repository for chill bot",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/anugrahkresnaya/new-chill-bot/issues"
   },
-  "homepage": "https://github.com/anugrahkresnaya/new-chill-bot#readme"
+  "homepage": "https://github.com/anugrahkresnaya/new-chill-bot#readme",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "erela.js": "^2.4.0"
+  }
 }
