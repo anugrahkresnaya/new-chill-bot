@@ -1,3 +1,4 @@
+const { LavalinkManager } = require('lavalink-client')
 const { Client, GatewayIntentBits, Collection } = require("discord.js")
 const { REST, Routes } = require('discord.js');
 const config = require('./Data/config.json');
@@ -5,7 +6,39 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers]
+})
+
+client.lavalink = new LavalinkManager({
+	nodes: [
+		{
+			authorization: "kabirjaipal",
+			host: "lavalink-v4-replit.anugrahkresnaya.repl.co",
+			port: 443,
+			id: "Lavalink",
+			secure: true
+		}
+],
+	sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+	client: {
+		id: config.clientId, username: "BORDILBOT"
+	},
+	autoSkip: true,
+	playerOptions: {
+		clientBasedPositionUpdateInterval: 150,
+		defaultSearchPlatform: "ytmsearch",
+		volumeDecrementer: 0.75,
+		onDisconnect: {
+			autoReconnect: true,
+			destroyPlayer: false
+		},
+		onEmptyQueue: {
+			destroyAfterMs: 30_000,
+		}
+	},
+	queueOptions: {
+		maxPreviousTracks: 25
+	}
 })
 
 client.commands = new Collection()
@@ -54,8 +87,10 @@ const rest = new REST().setToken(config.token);
 })();
 
 // client events starts
-client.once("ready", () => {
-  console.log("Bot Chill is online!")
+client.on("raw", d => client.lavalink.sendRawData(d))
+client.once("ready", async () => {
+  console.log("Bordil Bot is online!")
+	await client.lavalink.init({ ...client.user })
 })
 
 client.on("interactionCreate", (interaction) => {
