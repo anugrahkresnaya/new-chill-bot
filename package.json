@@ -4,7 +4,8 @@
   "description": "new repository for chill bot",
   "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./src/index.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,8 @@
   "homepage": "https://github.com/anugrahkresnaya/new-chill-bot#readme",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "erela.js": "^2.4.0"
+    "erela.js": "github:Tomato6966/erela.js",
+    "lavalink-client": "^1.2.4",
+    "nodemon": "^3.0.1"
   }
 }
