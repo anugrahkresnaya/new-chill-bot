@@ -3,14 +3,14 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 module.exports = {
   data:new SlashCommandBuilder()
     .setName("play")
-    .setDescription("Use this command to play your song")
+    .setDescription("Use this command to play song from the supported platform")
     .addStringOption(option => option
-      .setName("song_name")
-      .setDescription("Enter the name of the song you wanna play!")
+      .setName("input")
+      .setDescription("Enter the name or URL from YouTube or Spotify")
       .setRequired(true)),
 
   async execute(client, interaction) {
-    const song_name = interaction.options.getString('song_name')
+    const input = interaction.options.getString('input')
 
     if(!interaction.member.voice.channel) return interaction.reply({
       content: "You must join a voice channel to play music!",
@@ -18,7 +18,6 @@ module.exports = {
     })
 
     // Create the player 
-    // console.log("guild id", interaction.guild.id)
     const player = await client.lavalink.createPlayer({
       guildId: interaction.guild.id,
       voiceChannelId: interaction.member.voice.channel.id,
@@ -30,22 +29,13 @@ module.exports = {
 
     await player.connect()
 
-    const res = await player.search(song_name, interaction.user)
+    const res = await player.search(input, interaction.user)
 
     await player.queue.add(res.tracks[0])
 
     // Checks if the client should play the track if it's the first one added
     if (!player.playing) await player.play()
 
-    console.log('tracks log: ', res.tracks[0])
-
-    // ms duration converter
-    // const converter = (milis) => {
-    //   const minutes = Math.floor(milis / 60000)
-    //   const seconds = ((milis % 60000) / 10000).toFixed(0)
-    //   // return `${minutes} : ${(seconds < 10 ? '0' : '')} ${seconds}`
-    //   return (seconds == 60 ? (minutes + 1) + ':00' : minutes + ':' + (seconds < 10 ? '0' : '') + seconds)
-    // }
     const converter = (ms) => {
       const seconds = Math.floor(ms / 1000)
       const minutes = Math.floor(seconds / 60)
@@ -71,6 +61,6 @@ module.exports = {
       .setTimestamp()
       .setFooter({ text: res.tracks[0].requester.username})
 
-    interaction.reply({ embeds: [songEmbed]})
+    await interaction.reply({ embeds: [songEmbed]})
   }
 }

@@ -113,5 +113,4 @@ client.on("interactionCreate", (interaction) => {
 
 // client events ends
 
-
 client.login(config.token)
