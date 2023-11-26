@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -9,13 +9,17 @@ module.exports = {
     try {
       const player = client.lavalink.getPlayer(interaction.guild.id)
 
-      if(!player) return interaction.reply("I'm not pausing music on this server")
+      if(!player) return interaction.reply({ content: "I'm not pausing music on this server", ephemeral: true })
 
-      if(!player.playing) return interaction.reply("I'm not paused yet")
+      if(!player.playing) return interaction.reply({ content: "I'm not paused yet", ephemeral: true })
+
+      const resumeEmbed = new EmbedBuilder()
+        .setTitle('Resume')
+        .setDescription('Music is resumed')
 
       await player.resume()
 
-      interaction.reply("Music is resumed")
+      interaction.reply({ embeds: [resumeEmbed] })
     } catch (error) {
       console.log(error)
     }

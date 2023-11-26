@@ -52,14 +52,18 @@ module.exports = {
       .setColor(0x601390)
       .setTitle(res.tracks[0].info.title)
       .setURL(res.tracks[0].info.uri)
+      .setDescription('Track has been added to the queue')
       .setAuthor({ name: res.tracks[0].info.author })
       .setThumbnail(res.tracks[0].info.artworkUrl)
       .addFields(
         { name: 'Source', value: res.tracks[0].info.sourceName },
-        { name: 'Song duration', value: time}
+        { name: 'Song Duration', value: time},
       )
       .setTimestamp()
-      .setFooter({ text: res.tracks[0].requester.username})
+      .setFooter({ 
+        text: `Requested by ${res.tracks[0].requester.globalName}`,
+        iconURL: `https://cdn.discordapp.com/avatars/${res.tracks[0].requester?.id}/${res.tracks[0].requester?.avatar}`
+      })
 
     await interaction.reply({ embeds: [songEmbed]})
   }

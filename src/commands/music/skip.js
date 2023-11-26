@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -11,16 +11,36 @@ module.exports = {
 
       if(!player) return interaction.reply("I'm not skipping music on this server")
 
+      const getSkipIndex = interaction.options.getInteger("skipto")
+
       const current = player.queue.current
-      const nextTrack = player.queue.tracks[0]
+      const nextTrack = player.queue.tracks[getSkipIndex || 0]
 
       if(!nextTrack) return interaction.reply({ ephemeral: true, content: "no tracks to skip to"})
 
-      await player.skip((interaction.options.getInteger("skipto")) || 0)
+      const skippedEmbed = new EmbedBuilder()
+        .setTitle('Skipped')
+        .setFields(
+          { name: 'Current', value: current.info.title, inline: true },
+          { name: 'To', value: nextTrack?.info?.title, inline: true }
+        )
 
-      await interaction.reply({ ephemeral: true, content: current ?
-        `Skipped [\`${current.info.title}\`](<${current.info.uri}>) -> [\`${nextTrack.info.title}\`](<${nextTrack.info.uri}>)` :
-        `Skipped to [\`${nextTrack.info.title}\`](<${nextTrack.info.uri}>)`
-      })
+      const skippedToEmbed = new EmbedBuilder()
+        .setTitle('Skipped To')
+        .setFields(
+          { name: 'Current', value: current.info.title, inline: true },
+          { name: 'To', value: nextTrack?.info?.title, inline: true }
+        )
+
+      try {
+        await player.skip(getSkipIndex ? (getSkipIndex + 1) : 0)
+        await interaction.reply({ embeds: current ? [skippedEmbed] : [skippedToEmbed] })
+      } catch (error) {
+        console.log(error)
+        const errorEmbed = new EmbedBuilder()
+          .setTitle('Error')
+          .setDescription("Can't skip more than the queue size")
+        await interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+      }
     }
 }
