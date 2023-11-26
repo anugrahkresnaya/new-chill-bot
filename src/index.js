@@ -1,9 +1,9 @@
 const { LavalinkManager } = require('lavalink-client')
 const { Client, GatewayIntentBits, Collection, EmbedBuilder } = require("discord.js")
 const { REST, Routes } = require('discord.js');
-const config = require('./Data/config.json');
 const fs = require('node:fs');
 const path = require('node:path');
+require('dotenv').config()
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers]
@@ -21,7 +21,7 @@ client.lavalink = new LavalinkManager({
 ],
 	sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
 	client: {
-		id: config.clientId, username: "BORDILBOT"
+		id: process.env.CLIENT_ID, username: "BORDILBOT"
 	},
 	autoSkip: true,
 	playerOptions: {
@@ -66,7 +66,7 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST().setToken(config.token);
+const rest = new REST().setToken(process.env.TOKEN);
 
 // and deploy your commands!
 (async () => {
@@ -75,7 +75,7 @@ const rest = new REST().setToken(config.token);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationGuildCommands(config.clientId, config.guildId),
+			Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
 			{ body: commands },
 		);
 
@@ -167,4 +167,4 @@ client.lavalink.on('trackStart', (player, track) => {
 
 // client events ends
 
-client.login(config.token)
+client.login(process.env.TOKEN)
