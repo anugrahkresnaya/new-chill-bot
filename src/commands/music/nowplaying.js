@@ -9,9 +9,9 @@ module.exports = {
     try {
       const player = client.lavalink.getPlayer(interaction.guild.id)
 
-      if(!player) return interaction.reply("I'm not playing music on this server")
+      if(!player) return interaction.reply({ content: "I'm not playing music on this server", ephemeral: true })
 
-      if(!player.playing) return interaction.reply("I'm not played yet")
+      if(!player.playing) return interaction.reply({ content: "I'm not played yet", ephemeral: true })
 
       const current = player.queue.current
 
@@ -26,6 +26,8 @@ module.exports = {
       }
       const time = converter(current.info.duration)
 
+      console.log('current playing: ', current)
+
       const songEmbed = new EmbedBuilder()
         .setColor(0x601390)
         .setTitle(current.info.title)
@@ -33,13 +35,20 @@ module.exports = {
         .setAuthor({ name: current.info.author })
         .setThumbnail(current.info.artworkUrl)
         .addFields(
-          { name: 'Source', value: current.info.sourceName },
-          { name: 'Song duration', value: time}
+          { name: 'Source', value: current.info.sourceName, inline: true },
+          { name: 'Song duration', value: time, inline: true },
         )
         .setTimestamp()
-        .setFooter({ text: current.requester.username})
+        .setFooter({ 
+          text: `Requested by ${current.requester?.globalName}`,
+          iconURL: `https://cdn.discordapp.com/avatars/${current.requester?.id}/${current.requester?.avatar}`
+        })
 
-      await interaction.reply({ embeds: [songEmbed], components: [row]})
+      try {
+        await interaction.reply({ embeds: [songEmbed] })
+      } catch (error) {
+        interaction.reply({ content: 'got error with the request', ephemeral: true })
+      }
     } catch (error) {
       console.log(error)
     }

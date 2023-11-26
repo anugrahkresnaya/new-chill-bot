@@ -1,5 +1,5 @@
 const { LavalinkManager } = require('lavalink-client')
-const { Client, GatewayIntentBits, Collection } = require("discord.js")
+const { Client, GatewayIntentBits, Collection, EmbedBuilder } = require("discord.js")
 const { REST, Routes } = require('discord.js');
 const config = require('./Data/config.json');
 const fs = require('node:fs');
@@ -109,6 +109,60 @@ client.on("interactionCreate", (interaction) => {
   } catch (error) {
     interaction.reply({content: "There was a error executing this command.", ephemeral: true})
   }
+})
+
+// track events
+client.lavalink.on('trackStart', (player, track) => {
+	const channel = client.channels.cache.get(player.textChannelId)
+
+	if(!channel) return
+
+	const converter = (ms) => {
+		const seconds = Math.floor(ms / 1000)
+		const minutes = Math.floor(seconds / 60)
+		const remainingSeconds = seconds % 60
+
+		const formattedTime = minutes + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds
+
+		return formattedTime
+	}
+	const time = converter(track.info.duration)
+
+	const previousList = player.queue.previous.map(v => v.info.title)
+	const nextList = player.queue.tracks.map(v => v.info.title)
+
+	const nowPlayingEmbed = new EmbedBuilder()
+		.setColor(0x601390)
+		.setTitle(`${track.info.title} - ${track.info.author}`)
+		.setURL(track.info.uri)
+		.setAuthor({ name: 'Now Playing' })
+		.setThumbnail(track.info.artworkUrl)
+		.addFields(
+			{ name: 'Source', value: track.info.sourceName, inline: true },
+			{ name: 'Song Duration', value: time, inline: true },
+			{ name: 'Previous', value: `${previousList.join('\n')}` || 'no previous queue' },
+			{ name: 'Next', value:`${nextList.join('\n')}` || 'no next queue' }
+		)
+		.setFooter({ 
+			text: `Requested by ${track.requester?.globalName}`,
+			iconURL: `https://cdn.discordapp.com/avatars/${track.requester?.id}/${track.requester?.avatar}`
+		})
+
+	channel.send({ embeds: [nowPlayingEmbed] })
+}).on('trackError', (player, track, payload) => {
+	console.log('errored while playing ', track.info.title, 'errored data: ', payload)
+}).on('trackStuck', (player, track, payload) => {
+	console.log('player stucked while playing', track.info.title, 'STUCKED DATA : ', payload)
+}).on('queueEnd', (player, track, payload) => {
+	const channel = client.channels.cache.get(player.textChannelId)
+
+	if(!channel) return
+
+	const queueEndEmbed = new EmbedBuilder()
+		.setTitle('Queue End')
+		.setDescription('No more track on the queue')
+
+	channel.send({ embeds: [queueEndEmbed] })
 })
 
 // client events ends
